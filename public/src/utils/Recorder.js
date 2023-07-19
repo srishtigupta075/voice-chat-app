@@ -33,13 +33,9 @@ export const stopRecording = () => {
         const formData = new FormData();
         formData.append("file", file);
         res(formData);
-
-        // const player = new Audio(URL.createObjectURL(file));
-        // player.play();
       })
       .catch((e) => {
         alert("We could not retrieve your message");
-        console.log(e);
       });
   });
 };

@@ -49,7 +49,9 @@ export default function Chat() {
   return (
     <>
       <Container>
-        <NavBar />
+        <div className="navContainer">
+          <NavBar />
+        </div>
         <div className="container">
           <Contacts contacts={contacts} changeChat={handleChatChange} />
           {currentChat === undefined ? (
@@ -70,8 +72,11 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  .navContainer {
+    height: 10vh;
+  }
   .container {
-    height: 100vh;
+    height: 90vh;
     width: 100vw;
     background-color: #eff4f9;
     display: grid;

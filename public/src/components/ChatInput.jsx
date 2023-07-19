@@ -1,32 +1,72 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BsEmojiSmileFill } from "react-icons/bs";
 import { IoMdSend } from "react-icons/io";
-import mike from "../assets/mike.avif";
+import StartAudio from "../assets/audio1.png";
+import StopAudio from "../assets/audio4.png";
 import styled from "styled-components";
 import Picker from "emoji-picker-react";
 import { startRecording, stopRecording } from "../utils/Recorder";
 import axios from "axios";
 import { getTranslation } from "../utils/APIRoutes";
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
-export default function ChatInput({ handleSendMsg }) {
+export default function ChatInput({ handleSendMsg, translate }) {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const isRecording = useRef(false);
+  const [isRecording, setIsRecording] = useState(false);
+
+  useEffect(() => {
+    SpeechRecognition.startListening({ continuous: true });
+  }, [])
+
+  const commands = [
+    {
+      command: '* record',
+      callback: () => {
+        console.log('test1');
+        start();
+      }
+    },
+    {
+      command: 'record *',
+      callback: () => {
+        console.log('test2');
+        start();
+      }
+    },
+    {
+      command: '* record *',
+      callback: () => {
+        console.log('test3');
+        start();
+      }
+    },
+    {
+      command: 'stop',
+      callback: () => {
+        console.log('test4');
+        stop();
+      }
+    },
+  ]
+  useSpeechRecognition({commands});
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
   };
 
   const start = () => {
-    isRecording.current = true;
+    setIsRecording(true);
     startRecording();
   };
 
   const stop = async () => {
-    isRecording.current = false;
+    setIsRecording(false);
     const formData = await stopRecording();
-    await axios.post(getTranslation, formData, {
+    formData.append('translate', translate);
+    const res = await axios.post(getTranslation, formData, {
       headers: { "Content-type": `multipart/form-data` },
     });
+    setMsg(msg + " " + res.data.msg);
   };
 
   const handleEmojiClick = (event, emojiObject) => {
@@ -51,14 +91,14 @@ export default function ChatInput({ handleSendMsg }) {
           {showEmojiPicker && <Picker onEmojiClick={handleEmojiClick} />}
         </div>
       </div>
-      <button
+      <div
         className="recorder"
         onClick={() => {
-          !isRecording.current ? start() : stop();
+          !isRecording ? start() : stop();
         }}
       >
-        <img src={mike} />
-      </button>
+        <img src={!isRecording ? StartAudio : StopAudio} />
+      </div>
       <form className="input-container" onSubmit={(event) => sendChat(event)}>
         <input
           type="text"
@@ -78,6 +118,7 @@ const Container = styled.div`
   display: grid;
   align-items: center;
   grid-template-columns: 5% 5% 90%;
+  gap: 0.5rem;
   background-color: hsl(205, 97%, 41%);
   padding: 0 2rem;
   @media screen and (min-width: 720px) and (max-width: 1080px) {
@@ -98,6 +139,7 @@ const Container = styled.div`
     gap: 1rem;
     .emoji {
       position: relative;
+      gap: 1rem;
       svg {
         font-size: 1.5rem;
         color: #ffff00c8;

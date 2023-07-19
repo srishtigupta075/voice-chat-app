@@ -4,11 +4,36 @@ import ChatInput from "./ChatInput";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { TiTick } from "react-icons/ti";
+
+const useOutsideClick = (callback) => {
+  const ref = React.useRef();
+  useEffect(() => {
+    const handleClick = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        callback();
+      }
+    };
+    document.addEventListener('click', handleClick, true);
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+    };
+  }, [ref]);
+  return ref;
+};
 
 export default function ChatContainer({ currentChat, socket }) {
   const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
+  const [userTranslateMap, setUserTranslateMap] = useState({});
+  const [dropdown, setDropDown] = useState(false);
+  
+  const handleClickOutside  = () => {
+    setDropDown(false);
+  };
+  const ref = useOutsideClick(handleClickOutside);
 
   useEffect(async () => {
     const data = await JSON.parse(
@@ -68,6 +93,10 @@ export default function ChatContainer({ currentChat, socket }) {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleTranslate = () => {
+    setUserTranslateMap({...userTranslateMap, [currentChat._id]: !userTranslateMap[currentChat._id]});
+  }
+
   return (
     <Container>
       <div className="chat-header">
@@ -80,6 +109,13 @@ export default function ChatContainer({ currentChat, socket }) {
           </div>
           <div className="username">
             <h3>{currentChat.username}</h3>
+          </div>
+          <div ref={ref} className="dropdown" onClick={() => setDropDown(!dropdown)}><BsThreeDotsVertical />
+            {dropdown && <ul className="menu">
+              <li className="menu-item" onClick={() => handleTranslate()}>
+                <div>{userTranslateMap[currentChat._id] && <TiTick />} Translate</div>
+              </li>
+            </ul>}
           </div>
         </div>
       </div>
@@ -100,7 +136,7 @@ export default function ChatContainer({ currentChat, socket }) {
           );
         })}
       </div>
-      <ChatInput handleSendMsg={handleSendMsg} />
+      <ChatInput handleSendMsg={handleSendMsg} translate={userTranslateMap[currentChat._id]} />
     </Container>
   );
 }
@@ -110,7 +146,7 @@ const Container = styled.div`
   grid-template-rows: 10% 80% 10%;
   gap: 0.1rem;
   overflow: hidden;
-  background-color: #ebdfdf73;;
+  background-color: #ebdfdf73;
   @media screen and (min-width: 720px) and (max-width: 1080px) {
     grid-template-rows: 15% 70% 15%;
   }
@@ -121,6 +157,7 @@ const Container = styled.div`
     padding: 0 2rem;
     .user-details {
       display: flex;
+      width: 100%;
       align-items: center;
       gap: 1rem;
       margin-top: 0.5rem;
@@ -177,5 +214,48 @@ const Container = styled.div`
         background-color: hsl(205, 97%, 41%);
       }
     }
+  }
+  .dropdown {
+    position: relative;
+    margin-left: auto;
+  }
+  
+  .menu {
+    position: absolute;
+  
+    list-style-type: none;
+    margin: 5px 0;
+    padding: 3px;
+    right: 0;
+    border: 1px solid grey;
+    width: 100px;
+  }
+  
+  .menu > li {
+    margin: 0;
+  
+    background-color: white;
+  }
+  
+  .menu > li:hover {
+    background-color: lightgray;
+  }
+  
+  .menu > li > button {
+    width: 100%;
+    height: 100%;
+    text-align: left;
+  
+    background: none;
+    color: inherit;
+    border: none;
+    padding: 5px;
+    margin: 0;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .menu-item > div {
+    display: flex;
   }
 `;
