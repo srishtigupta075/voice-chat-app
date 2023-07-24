@@ -8,84 +8,42 @@ import Picker from "emoji-picker-react";
 import { startRecording, stopRecording } from "../utils/Recorder";
 import axios from "axios";
 import { getTranslation } from "../utils/APIRoutes";
-import { useSpeechRecognition } from 'react-speech-recognition';
-// import { SR } from '../pages/Chat';
-import hark from 'hark';
 
-export default function ChatInput({ handleSendMsg, translate }) {
+export default function ChatInput({
+  handleSendMsg,
+  translate,
+  message,
+  isRecording,
+  setIsRecording,
+}) {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const isRecordingRef = useRef(false);
 
   useEffect(() => {
-    navigator.getUserMedia({ audio : true}, onMediaSuccess, function(){});
-    function onMediaSuccess(blog) {
-      var speechEvents = hark(blog, { interval: 200 });
-      // speechEvents.setInterval(900)
-      speechEvents.on('speaking', function() {
-        console.log('started_speaking', isRecording);
-      });
-      speechEvents.on('stopped_speaking', function() {
-        console.log('stopped_speaking', isRecordingRef);
-        if (isRecordingRef.current) {
-          stop();
-        }
-      });
-    };
-  }, []);
+    if (message && message.toLowerCase().includes("record")) {
+      start();
+    }
+  }, [message]);
 
-  const commands = [
-    {
-      command: '* record',
-      callback: () => {
-        // SR.stopListening();
-        start();
-      }
-    },
-    {
-      command: 'record *',
-      callback: () => {
-        // SR.stopListening();
-        start();
-      }
-    },
-    {
-      command: '* record *',
-      callback: () => {
-        // SR.stopListening();
-        start();
-      }
-    },
-    {
-      command: 'send',
-      callback: () => {
-        console.log('sent');
-        if (msg.length > 0) {
-          handleSendMsg(msg);
-          setMsg("");
-        }
-      }
-    },
-  ]
-  useSpeechRecognition({commands});
+  useEffect(() => {
+    if (isRecording === false) {
+      stop();
+    }
+  }, [isRecording]);
+
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
   };
 
   const start = () => {
-    // SR.stopListening();
     setIsRecording(true);
-    isRecordingRef.current = true;
     startRecording();
   };
 
   const stop = async () => {
-    // SR.startListening({ continuous: true });
-    setIsRecording(false);
-    isRecordingRef.current = false;
+    setIsRecording(undefined);
     const formData = await stopRecording();
-    formData.append('translate', translate);
+    formData.append("translate", translate);
     const res = await axios.post(getTranslation, formData, {
       headers: { "Content-type": `multipart/form-data` },
     });
@@ -125,7 +83,7 @@ export default function ChatInput({ handleSendMsg, translate }) {
       <form className="input-container" onSubmit={(event) => sendChat(event)}>
         <input
           type="text"
-          placeholder={isRecording ? "Listening" : "type your message here" }
+          placeholder={isRecording ? "Listening" : "type your message here"}
           onChange={(e) => setMsg(e.target.value)}
           value={msg}
         />
@@ -150,6 +108,7 @@ const Container = styled.div`
   }
   .recorder {
     width: 24px;
+    cursor: pointer;
     img {
       height: 24px;
       width: 100%;

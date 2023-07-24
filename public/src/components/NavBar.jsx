@@ -1,19 +1,19 @@
-import React, { useEffect, useState, useRef } from "react";
-import Logo from "../assets/sasLogo.png";
+import React from "react";
+import Logo from "../assets/chat-icon.jpg";
 import styled from "styled-components";
 import Logout from "./Logout";
 
-export default function NavBar() {
+export default function NavBar({ message }) {
   return (
     <>
       <Container>
         <div className="brand">
           <div className="leftBar">
             <img src={Logo} alt="logo" />
-            <h3>SAS Teams</h3>
+            <h3>Smart Chat</h3>
           </div>
 
-          <Logout />
+          <Logout message={message} />
         </div>
       </Container>
     </>

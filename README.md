@@ -1,4 +1,4 @@
-# SAS Teams - Chat Application 
+# Smart Chat - Chat Application 
 
 ## Installation Guide
 

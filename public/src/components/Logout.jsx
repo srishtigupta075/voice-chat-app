@@ -1,28 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BiPowerOff } from "react-icons/bi";
 import styled from "styled-components";
 import axios from "axios";
 import { logoutRoute } from "../utils/APIRoutes";
-import { useSpeechRecognition } from 'react-speech-recognition';
 
-export default function Logout() {
+export default function Logout({ message }) {
   const navigate = useNavigate();
-  const commands = [
-    {
-      command: 'log out',
-      callback: () => {
-        handleClick();
-      }
-    },
-  ]
-  useSpeechRecognition({commands});
+
+  useEffect(() => {
+    if (message && message.toLowerCase().includes("log out")) {
+      handleClick();
+    }
+  }, [message]);
+
   const handleClick = async () => {
     const id = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
     )._id;
     const data = await axios.get(`${logoutRoute}/${id}`);
     if (data.status === 200) {
+      window.recognition.stop();
       localStorage.clear();
       navigate("/login");
     }

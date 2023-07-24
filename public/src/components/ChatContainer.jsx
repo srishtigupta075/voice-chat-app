@@ -6,6 +6,8 @@ import axios from "axios";
 import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { TiTick } from "react-icons/ti";
+import { stringAvatar } from "../utils/ImageUtil";
+import Avatar from "@mui/material/Avatar";
 
 const useOutsideClick = (callback) => {
   const ref = React.useRef();
@@ -15,22 +17,28 @@ const useOutsideClick = (callback) => {
         callback();
       }
     };
-    document.addEventListener('click', handleClick, true);
+    document.addEventListener("click", handleClick, true);
     return () => {
-      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener("click", handleClick, true);
     };
   }, [ref]);
   return ref;
 };
 
-export default function ChatContainer({ currentChat, socket }) {
+export default function ChatContainer({
+  currentChat,
+  socket,
+  message,
+  isRecording,
+  setIsRecording,
+}) {
   const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const [userTranslateMap, setUserTranslateMap] = useState({});
   const [dropdown, setDropDown] = useState(false);
-  
-  const handleClickOutside  = () => {
+
+  const handleClickOutside = () => {
     setDropDown(false);
   };
   const ref = useOutsideClick(handleClickOutside);
@@ -94,28 +102,38 @@ export default function ChatContainer({ currentChat, socket }) {
   }, [messages]);
 
   const handleTranslate = () => {
-    setUserTranslateMap({...userTranslateMap, [currentChat._id]: !userTranslateMap[currentChat._id]});
-  }
+    setUserTranslateMap({
+      ...userTranslateMap,
+      [currentChat._id]: !userTranslateMap[currentChat._id],
+    });
+  };
 
   return (
     <Container>
       <div className="chat-header">
         <div className="user-details">
           <div className="avatar">
-            <img
-              src={`data:image/svg+xml;base64,${currentChat.avatarImage}`}
-              alt=""
-            />
+            <Avatar {...stringAvatar(`${currentChat.username}`)} />
           </div>
           <div className="username">
             <h3>{currentChat.username}</h3>
           </div>
-          <div ref={ref} className="dropdown" onClick={() => setDropDown(!dropdown)}><BsThreeDotsVertical />
-            {dropdown && <ul className="menu">
-              <li className="menu-item" onClick={() => handleTranslate()}>
-                <div>{userTranslateMap[currentChat._id] && <TiTick />} Translate</div>
-              </li>
-            </ul>}
+          <div
+            ref={ref}
+            className="dropdown"
+            onClick={() => setDropDown(!dropdown)}
+          >
+            <BsThreeDotsVertical />
+            {dropdown && (
+              <ul className="menu">
+                <li className="menu-item" onClick={() => handleTranslate()}>
+                  <div>
+                    {userTranslateMap[currentChat._id] && <TiTick />} Translate
+                    to English
+                  </div>
+                </li>
+              </ul>
+            )}
           </div>
         </div>
       </div>
@@ -136,7 +154,13 @@ export default function ChatContainer({ currentChat, socket }) {
           );
         })}
       </div>
-      <ChatInput handleSendMsg={handleSendMsg} translate={userTranslateMap[currentChat._id]} />
+      <ChatInput
+        handleSendMsg={handleSendMsg}
+        translate={userTranslateMap[currentChat._id]}
+        message={message}
+        isRecording={isRecording}
+        setIsRecording={setIsRecording}
+      />
     </Container>
   );
 }
@@ -219,43 +243,28 @@ const Container = styled.div`
     position: relative;
     margin-left: auto;
   }
-  
+
   .menu {
     position: absolute;
-  
     list-style-type: none;
-    margin: 5px 0;
-    padding: 3px;
+    padding: 10px;
     right: 0;
     border: 1px solid grey;
-    width: 100px;
-  }
-  
-  .menu > li {
-    margin: 0;
-  
+    border-radius: 5px;
+    width: 200px;
+    height: 35px;
     background-color: white;
-  }
-  
-  .menu > li:hover {
-    background-color: lightgray;
-  }
-  
-  .menu > li > button {
-    width: 100%;
-    height: 100%;
-    text-align: left;
-  
-    background: none;
-    color: inherit;
-    border: none;
-    padding: 5px;
-    margin: 0;
-    font: inherit;
-    cursor: pointer;
+
+    .menu-item {
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      display: flex;
+    }
   }
 
   .menu-item > div {
     display: flex;
+    gap: 0.5rem;
   }
 `;
