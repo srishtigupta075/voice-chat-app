@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BsEmojiSmileFill } from "react-icons/bs";
 import { IoMdSend } from "react-icons/io";
 import StartAudio from "../assets/audio1.png";
@@ -8,44 +8,63 @@ import Picker from "emoji-picker-react";
 import { startRecording, stopRecording } from "../utils/Recorder";
 import axios from "axios";
 import { getTranslation } from "../utils/APIRoutes";
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { useSpeechRecognition } from 'react-speech-recognition';
+// import { SR } from '../pages/Chat';
+import hark from 'hark';
 
 export default function ChatInput({ handleSendMsg, translate }) {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const isRecordingRef = useRef(false);
 
   useEffect(() => {
-    SpeechRecognition.startListening({ continuous: true });
-  }, [])
+    navigator.getUserMedia({ audio : true}, onMediaSuccess, function(){});
+    function onMediaSuccess(blog) {
+      var speechEvents = hark(blog, { interval: 200 });
+      // speechEvents.setInterval(900)
+      speechEvents.on('speaking', function() {
+        console.log('started_speaking', isRecording);
+      });
+      speechEvents.on('stopped_speaking', function() {
+        console.log('stopped_speaking', isRecordingRef);
+        if (isRecordingRef.current) {
+          stop();
+        }
+      });
+    };
+  }, []);
 
   const commands = [
     {
       command: '* record',
       callback: () => {
-        console.log('test1');
+        // SR.stopListening();
         start();
       }
     },
     {
       command: 'record *',
       callback: () => {
-        console.log('test2');
+        // SR.stopListening();
         start();
       }
     },
     {
       command: '* record *',
       callback: () => {
-        console.log('test3');
+        // SR.stopListening();
         start();
       }
     },
     {
-      command: 'stop',
+      command: 'send',
       callback: () => {
-        console.log('test4');
-        stop();
+        console.log('sent');
+        if (msg.length > 0) {
+          handleSendMsg(msg);
+          setMsg("");
+        }
       }
     },
   ]
@@ -55,12 +74,16 @@ export default function ChatInput({ handleSendMsg, translate }) {
   };
 
   const start = () => {
+    // SR.stopListening();
     setIsRecording(true);
+    isRecordingRef.current = true;
     startRecording();
   };
 
   const stop = async () => {
+    // SR.startListening({ continuous: true });
     setIsRecording(false);
+    isRecordingRef.current = false;
     const formData = await stopRecording();
     formData.append('translate', translate);
     const res = await axios.post(getTranslation, formData, {
@@ -102,7 +125,7 @@ export default function ChatInput({ handleSendMsg, translate }) {
       <form className="input-container" onSubmit={(event) => sendChat(event)}>
         <input
           type="text"
-          placeholder="type your message here"
+          placeholder={isRecording ? "Listening" : "type your message here" }
           onChange={(e) => setMsg(e.target.value)}
           value={msg}
         />

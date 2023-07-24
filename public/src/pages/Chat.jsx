@@ -8,6 +8,7 @@ import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
 import NavBar from "../components/NavBar";
+import SpeechRecognition from 'react-speech-recognition';
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function Chat() {
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
   useEffect(async () => {
+    SpeechRecognition.startListening({continuous: true});
     if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
       navigate("/login");
     } else {
@@ -64,6 +66,8 @@ export default function Chat() {
     </>
   );
 }
+
+export const SR = SpeechRecognition;
 
 const Container = styled.div`
   height: 100vh;

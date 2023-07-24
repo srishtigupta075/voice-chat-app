@@ -4,8 +4,19 @@ import { BiPowerOff } from "react-icons/bi";
 import styled from "styled-components";
 import axios from "axios";
 import { logoutRoute } from "../utils/APIRoutes";
+import { useSpeechRecognition } from 'react-speech-recognition';
+
 export default function Logout() {
   const navigate = useNavigate();
+  const commands = [
+    {
+      command: 'log out',
+      callback: () => {
+        handleClick();
+      }
+    },
+  ]
+  useSpeechRecognition({commands});
   const handleClick = async () => {
     const id = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
