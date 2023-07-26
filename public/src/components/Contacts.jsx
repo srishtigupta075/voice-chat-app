@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Avatar from "@mui/material/Avatar";
-import { stringAvatar } from "../utils/ImageUtil";
+import {  stringAvatar } from "../utils/ImageUtil";
+import {soundex} from 'soundex-code'
 
-export default function Contacts({ contacts, changeChat }) {
+export default function Contacts({ contacts, changeChat, message }) {
   const [currentUserName, setCurrentUserName] = useState(undefined);
   const [currentSelected, setCurrentSelected] = useState(undefined);
 
@@ -13,6 +14,17 @@ export default function Contacts({ contacts, changeChat }) {
     );
     setCurrentUserName(data.username);
   }, []);
+
+  useEffect(() => {
+    if (message) {
+      const messageArray = message.toLowerCase().split(' ');
+      contacts.forEach((c, i) => {
+        messageArray.forEach(msg => {
+          if (soundex(c.username) === soundex(msg)) changeCurrentChat(i, c);
+        })
+      })
+    }
+  }, [message]);
 
   const changeCurrentChat = (index, contact) => {
     setCurrentSelected(index);
@@ -47,7 +59,7 @@ export default function Contacts({ contacts, changeChat }) {
             <Avatar {...stringAvatar(`${currentUserName}`)} />
           </div>
           <div className="username">
-            <h2>{currentUserName}</h2>
+            <h3>{currentUserName}</h3>
           </div>
         </div>
       </Container>
@@ -128,17 +140,12 @@ const Container = styled.div`
       }
     }
     .username {
-      h2 {
+      h3 {
         color: white;
       }
     }
     @media screen and (min-width: 720px) and (max-width: 1080px) {
       gap: 0.5rem;
-      .username {
-        h2 {
-          font-size: 1rem;
-        }
-      }
     }
   }
 `;

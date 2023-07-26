@@ -22,6 +22,11 @@ export default function ChatInput({
   useEffect(() => {
     if (message && message.toLowerCase().includes("record")) {
       start();
+    } else if (message && message.toLowerCase().includes("send")) {
+      if (msg && isRecording === undefined) {
+        handleSendMsg(msg);
+        setMsg("");
+      }
     }
   }, [message]);
 

@@ -10,7 +10,7 @@ export default function NavBar({ message }) {
         <div className="brand">
           <div className="leftBar">
             <img src={Logo} alt="logo" />
-            <h3>Smart Chat</h3>
+            <h2>IntelliChat</h2>
           </div>
 
           <Logout message={message} />
@@ -33,9 +33,8 @@ const Container = styled.div`
     img {
       height: 2rem;
     }
-    h3 {
+    h2 {
       color: white;
-      text-transform: uppercase;
       align-items: center;
       justify-content: center;
       display: flex;

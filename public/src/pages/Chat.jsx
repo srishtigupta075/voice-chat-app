@@ -33,21 +33,16 @@ export default function Chat() {
     recognition.onresult = (event) => {
       const results = event.results;
       const text = results[results.length - 1][0].transcript;
-      if (text.toLowerCase() === "open smart assistant.") {
+      console.log(text);
+      if (text.toLowerCase().includes("hey, lisa")) {
         setIsOpen(true);
       }
       showModal.current && setModalText(text);
       isRecordingRef.current && setIsRecording(false);
-      console.log(text);
     };
 
-    // recognition.onspeechstart = (event) => {
-    //   console.log("start", event);
-    // };
-
     recognition.onend = (event) => {
-      console.log("end", event);
-      // recognition.start();
+      recognition.start();
     };
 
     if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
@@ -112,7 +107,7 @@ export default function Chat() {
           <NavBar message={message} />
         </div>
         <div className="container">
-          <Contacts contacts={contacts} changeChat={handleChatChange} />
+          <Contacts contacts={contacts} changeChat={handleChatChange} message={message} />
           {currentChat === undefined ? (
             <Welcome />
           ) : (
