@@ -2,8 +2,9 @@ import React from "react";
 import Logo from "../assets/chat-icon.jpg";
 import styled from "styled-components";
 import Logout from "./Logout";
+import { FcAssistant } from "react-icons/fc";
 
-export default function NavBar({ message }) {
+export default function NavBar({ message, startAssistant }) {
   return (
     <>
       <Container>
@@ -12,8 +13,12 @@ export default function NavBar({ message }) {
             <img src={Logo} alt="logo" />
             <h2>IntelliChat</h2>
           </div>
-
-          <Logout message={message} />
+          <div className={"rightBar"}>
+            <Button className="assistant" onClick={startAssistant}>
+              <FcAssistant />
+            </Button>
+            <Logout message={message} />
+          </div>
         </div>
       </Container>
     </>
@@ -29,7 +34,7 @@ const Container = styled.div`
     display: flex;
     gap: 1rem;
     padding: 1rem;
-    justify-content: space-between;
+    // justify-content: space-between;
     img {
       height: 2rem;
     }
@@ -43,5 +48,26 @@ const Container = styled.div`
       display: flex;
       gap: 1rem;
     }
+    .rightBar {
+      display: flex;
+      margin-left: auto;
+      .assistant {
+        margin-right: 1rem;
+      }
+    }
+  }
+`;
+const Button = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: hsl(205, 97%, 41%);
+  border: none;
+  cursor: pointer;
+  svg {
+    font-size: 1.3rem;
+    color: #ebe7ff;
   }
 `;

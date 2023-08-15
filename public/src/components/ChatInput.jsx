@@ -9,32 +9,21 @@ import { startRecording, stopRecording } from "../utils/Recorder";
 import axios from "axios";
 import { getTranslation } from "../utils/APIRoutes";
 
-export default function ChatInput({
-  handleSendMsg,
-  translate,
-  message,
-  isRecording,
-  setIsRecording,
-}) {
+export default function ChatInput({ handleSendMsg, translate, message }) {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   useEffect(() => {
     if (message && message.toLowerCase().includes("record")) {
       start();
     } else if (message && message.toLowerCase().includes("send")) {
-      if (msg && isRecording === undefined) {
+      if (msg && !isRecording) {
         handleSendMsg(msg);
         setMsg("");
       }
     }
   }, [message]);
-
-  useEffect(() => {
-    if (isRecording === false) {
-      stop();
-    }
-  }, [isRecording]);
 
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
@@ -46,13 +35,17 @@ export default function ChatInput({
   };
 
   const stop = async () => {
-    setIsRecording(undefined);
+    setIsRecording(false);
     const formData = await stopRecording();
     formData.append("translate", translate);
     const res = await axios.post(getTranslation, formData, {
       headers: { "Content-type": `multipart/form-data` },
     });
-    setMsg(msg + " " + res.data.msg);
+    let message = res.data.msg;
+    if (message.startsWith('"')) {
+      message = message.substring(1, message.length - 1);
+    }
+    setMsg(msg + " " + message);
   };
 
   const handleEmojiClick = (event, emojiObject) => {

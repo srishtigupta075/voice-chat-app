@@ -1,30 +1,80 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import Avatar from "@mui/material/Avatar";
-import {  stringAvatar } from "../utils/ImageUtil";
-import {soundex} from 'soundex-code'
+import { stringAvatar } from "../utils/ImageUtil";
+import { soundex } from "soundex-code";
+import axios from "axios";
+import { recieveMessageRoute } from "../utils/APIRoutes";
 
-export default function Contacts({ contacts, changeChat, message }) {
-  const [currentUserName, setCurrentUserName] = useState(undefined);
+export default function Contacts({
+  contacts,
+  changeChat,
+  message,
+  socket,
+  currChatMsg,
+}) {
+  const [currentUserData, setCurrentUserData] = useState(undefined);
   const [currentSelected, setCurrentSelected] = useState(undefined);
+  const [lastMessage, setLastMessage] = useState({});
+  const lastMessageRef = useRef({});
 
-  useEffect(async () => {
-    const data = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    );
-    setCurrentUserName(data.username);
+  useEffect(() => {
+    (async () => {
+      const data = await JSON.parse(
+        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+      );
+      setCurrentUserData(data);
+    })();
   }, []);
 
   useEffect(() => {
     if (message) {
-      const messageArray = message.toLowerCase().split(' ');
+      const messageArray = message.toLowerCase().split(" ");
       contacts.forEach((c, i) => {
-        messageArray.forEach(msg => {
+        messageArray.forEach((msg) => {
           if (soundex(c.username) === soundex(msg)) changeCurrentChat(i, c);
-        })
-      })
+        });
+      });
     }
   }, [message]);
+
+  useEffect(() => {
+    if (socket.current) {
+      socket.current.on("msg-recieve", (data) => {
+        setLastMessage({ ...lastMessageRef.current, [data.from]: data.msg });
+      });
+    }
+  }, [socket.current]);
+
+  useEffect(() => {
+    lastMessageRef.current = lastMessage;
+  }, [lastMessage]);
+
+  useEffect(() => {
+    setLastMessage({
+      ...lastMessageRef.current,
+      [contacts[currentSelected]?._id]: currChatMsg,
+    });
+  }, [currChatMsg]);
+
+  useEffect(() => {
+    Promise.all(
+      contacts.map(async (contact) => {
+        const response = await axios.post(recieveMessageRoute, {
+          from: currentUserData._id,
+          to: contact?._id,
+        });
+        const msgs = response.data;
+        return { [contact?._id]: msgs[msgs.length - 1]?.message };
+      })
+    ).then((arr) => {
+      const tempLastMsg = {};
+      arr.forEach((item, index) => {
+        tempLastMsg[contacts[index]._id] = item[contacts[index]._id];
+      });
+      setLastMessage(tempLastMsg);
+    });
+  }, [contacts]);
 
   const changeCurrentChat = (index, contact) => {
     setCurrentSelected(index);
@@ -49,6 +99,7 @@ export default function Contacts({ contacts, changeChat, message }) {
                 </div>
                 <div className="username">
                   <h3>{contact.username}</h3>
+                  <h5>{lastMessage[contact?._id]}</h5>
                 </div>
               </div>
             );
@@ -56,10 +107,10 @@ export default function Contacts({ contacts, changeChat, message }) {
         </div>
         <div className="current-user">
           <div className="avatar">
-            <Avatar {...stringAvatar(`${currentUserName}`)} />
+            <Avatar {...stringAvatar(`${currentUserData?.username}`)} />
           </div>
           <div className="username">
-            <h3>{currentUserName}</h3>
+            <h3>{currentUserData?.username}</h3>
           </div>
         </div>
       </Container>
@@ -117,8 +168,16 @@ const Container = styled.div`
         }
       }
       .username {
+        overflow: hidden;
         h3 {
           color: black;
+        }
+        h5 {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-top: 0.3rem;
+          font-weight: 600;
         }
       }
     }

@@ -18,15 +18,12 @@ export const startRecording = () => {
 };
 
 export const stopRecording = () => {
-  // Once you are done singing your best song, stop and get the mp3.
   return new Promise((res) => {
     recorder
       .stop()
       .getMp3()
       .then(([buffer, blob]) => {
-        // do what ever you want with buffer and blob
-        // Example: Create a mp3 file and play
-        const file = new File(buffer, "me-at-thevoice.mp3", {
+        const file = new File(buffer, "audio.mp3", {
           type: blob.type,
           lastModified: Date.now(),
         });

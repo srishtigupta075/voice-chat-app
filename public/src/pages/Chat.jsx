@@ -16,35 +16,13 @@ export default function Chat() {
   const [contacts, setContacts] = useState([]);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
-  const [isRecording, setIsRecording] = useState(undefined);
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [modalText, setModalText] = useState("");
   const showModal = useRef(false);
-  const isRecordingRef = useRef(false);
+  const [currChatMsg, setCurrChatMsg] = useState("");
 
   useEffect(async () => {
-    const recognition = new window.webkitSpeechRecognition();
-    window.recognition = recognition;
-    recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.start();
-
-    recognition.onresult = (event) => {
-      const results = event.results;
-      const text = results[results.length - 1][0].transcript;
-      console.log(text);
-      if (text.toLowerCase().includes("hey, lisa")) {
-        setIsOpen(true);
-      }
-      showModal.current && setModalText(text);
-      isRecordingRef.current && setIsRecording(false);
-    };
-
-    recognition.onend = (event) => {
-      recognition.start();
-    };
-
     if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
       navigate("/login");
     } else {
@@ -79,10 +57,6 @@ export default function Chat() {
   }, [isOpen]);
 
   useEffect(() => {
-    isRecordingRef.current = isRecording;
-  }, [isRecording]);
-
-  useEffect(() => {
     if (currentUser) {
       socket.current = io(host);
       socket.current.emit("add-user", currentUser._id);
@@ -100,14 +74,37 @@ export default function Chat() {
     setCurrentChat(chat);
   };
 
+  const startAssistant = () => {
+    const recognition = new window.webkitSpeechRecognition();
+    setIsOpen(true);
+    const onEnd = () => {
+      recognition.stop();
+    };
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.start();
+    recognition.onresult = (event) => {
+      const results = event.results;
+      const text = results[results.length - 1][0].transcript;
+      showModal.current && setModalText(text);
+      onEnd();
+    };
+  };
+
   return (
     <>
       <Container>
         <div className="navContainer">
-          <NavBar message={message} />
+          <NavBar message={message} startAssistant={startAssistant} />
         </div>
         <div className="container">
-          <Contacts contacts={contacts} changeChat={handleChatChange} message={message} />
+          <Contacts
+            contacts={contacts}
+            changeChat={handleChatChange}
+            message={message}
+            socket={socket}
+            currChatMsg={currChatMsg}
+          />
           {currentChat === undefined ? (
             <Welcome />
           ) : (
@@ -115,8 +112,7 @@ export default function Chat() {
               currentChat={currentChat}
               socket={socket}
               message={message}
-              isRecording={isRecording}
-              setIsRecording={setIsRecording}
+              handleSendMessage={setCurrChatMsg}
             />
           )}
         </div>

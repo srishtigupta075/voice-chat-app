@@ -29,8 +29,7 @@ export default function ChatContainer({
   currentChat,
   socket,
   message,
-  isRecording,
-  setIsRecording,
+  handleSendMessage,
 }) {
   const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
@@ -43,15 +42,17 @@ export default function ChatContainer({
   };
   const ref = useOutsideClick(handleClickOutside);
 
-  useEffect(async () => {
-    const data = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    );
-    const response = await axios.post(recieveMessageRoute, {
-      from: data._id,
-      to: currentChat._id,
-    });
-    setMessages(response.data);
+  useEffect(() => {
+    (async () => {
+      const data = await JSON.parse(
+        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+      );
+      const response = await axios.post(recieveMessageRoute, {
+        from: data._id,
+        to: currentChat._id,
+      });
+      setMessages(response.data);
+    })();
   }, [currentChat]);
 
   useEffect(() => {
@@ -74,6 +75,7 @@ export default function ChatContainer({
       from: data._id,
       msg,
     });
+    handleSendMessage(msg);
     await axios.post(sendMessageRoute, {
       from: data._id,
       to: currentChat._id,
@@ -87,8 +89,9 @@ export default function ChatContainer({
 
   useEffect(() => {
     if (socket.current) {
-      socket.current.on("msg-recieve", (msg) => {
-        setArrivalMessage({ fromSelf: false, message: msg });
+      socket.current.on("msg-recieve", (data) => {
+        currentChat._id === data.from &&
+          setArrivalMessage({ fromSelf: false, message: data.msg });
       });
     }
   }, []);
@@ -128,7 +131,7 @@ export default function ChatContainer({
               <ul className="menu">
                 <li className="menu-item" onClick={() => handleTranslate()}>
                   <div>
-                    {userTranslateMap[currentChat._id] && <TiTick />} Translate
+                    {!userTranslateMap[currentChat._id] && <TiTick />} Translate
                     to English
                   </div>
                 </li>
@@ -156,10 +159,8 @@ export default function ChatContainer({
       </div>
       <ChatInput
         handleSendMsg={handleSendMsg}
-        translate={userTranslateMap[currentChat._id]}
+        translate={!userTranslateMap[currentChat._id]}
         message={message}
-        isRecording={isRecording}
-        setIsRecording={setIsRecording}
       />
     </Container>
   );
