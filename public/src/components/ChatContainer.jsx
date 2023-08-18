@@ -5,25 +5,9 @@ import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { TiTick } from "react-icons/ti";
 import { stringAvatar } from "../utils/ImageUtil";
 import Avatar from "@mui/material/Avatar";
-
-const useOutsideClick = (callback) => {
-  const ref = React.useRef();
-  useEffect(() => {
-    const handleClick = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        callback();
-      }
-    };
-    document.addEventListener("click", handleClick, true);
-    return () => {
-      document.removeEventListener("click", handleClick, true);
-    };
-  }, [ref]);
-  return ref;
-};
+import { Popover, InputLabel, FormControl, NativeSelect } from "@mui/material";
 
 export default function ChatContainer({
   currentChat,
@@ -35,12 +19,7 @@ export default function ChatContainer({
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const [userTranslateMap, setUserTranslateMap] = useState({});
-  const [dropdown, setDropDown] = useState(false);
-
-  const handleClickOutside = () => {
-    setDropDown(false);
-  };
-  const ref = useOutsideClick(handleClickOutside);
+  const [anchorEle, setAnchorEle] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -104,10 +83,10 @@ export default function ChatContainer({
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleTranslate = () => {
+  const handleTranslate = (e) => {
     setUserTranslateMap({
       ...userTranslateMap,
-      [currentChat._id]: !userTranslateMap[currentChat._id],
+      [currentChat._id]: e.target.value,
     });
   };
 
@@ -122,22 +101,44 @@ export default function ChatContainer({
             <h3>{currentChat.username}</h3>
           </div>
           <div
-            ref={ref}
             className="dropdown"
-            onClick={() => setDropDown(!dropdown)}
+            onClick={(event) => setAnchorEle(event.currentTarget)}
           >
             <BsThreeDotsVertical />
-            {dropdown && (
-              <ul className="menu">
-                <li className="menu-item" onClick={() => handleTranslate()}>
-                  <div>
-                    {!userTranslateMap[currentChat._id] && <TiTick />} Translate
-                    to English
-                  </div>
-                </li>
-              </ul>
-            )}
           </div>
+          <Popover
+            id={Boolean(anchorEle) ? "popover" : undefined}
+            open={Boolean(anchorEle)}
+            anchorEl={anchorEle}
+            onClose={() => setAnchorEle(null)}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+          >
+            <div style={{ margin: "0.4rem" }}>
+              <FormControl fullWidth>
+                <InputLabel variant="standard" htmlFor="uncontrolled-native">
+                  Translate to
+                </InputLabel>
+                <NativeSelect
+                  defaultValue={userTranslateMap[currentChat._id] || "None"}
+                  onChange={handleTranslate}
+                >
+                  <option value={"English"}>English</option>
+                  <option value={"Chinese"}>Chinese</option>
+                  <option value={"Hindi"}>Hindi</option>
+                  <option value={"Marathi"}>Marathi</option>
+                  <option value={"Tamil"}>Tamil</option>
+                  <option value={"German"}>German</option>
+                  <option value={"French"}>French</option>
+                  <option value={"Spanish"}>Spanish</option>
+                  <option value={"Swedish"}>Swedish</option>
+                  <option value={"None"}>None</option>
+                </NativeSelect>
+              </FormControl>
+            </div>
+          </Popover>
         </div>
       </div>
       <div className="chat-messages">
@@ -159,7 +160,7 @@ export default function ChatContainer({
       </div>
       <ChatInput
         handleSendMsg={handleSendMsg}
-        translate={!userTranslateMap[currentChat._id]}
+        translateLang={userTranslateMap[currentChat._id]}
         message={message}
       />
     </Container>

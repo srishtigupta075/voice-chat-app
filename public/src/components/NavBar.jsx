@@ -29,6 +29,7 @@ const Container = styled.div`
   display: grid;
   overflow: hidden;
   background-color: hsl(205, 97%, 41%);
+  height: 100%;
   .brand {
     width: 100vw;
     display: flex;

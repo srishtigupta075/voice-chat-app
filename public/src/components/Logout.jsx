@@ -20,7 +20,6 @@ export default function Logout({ message }) {
     )._id;
     const data = await axios.get(`${logoutRoute}/${id}`);
     if (data.status === 200) {
-      window.recognition.stop();
       localStorage.clear();
       navigate("/login");
     }

@@ -9,7 +9,11 @@ import { startRecording, stopRecording } from "../utils/Recorder";
 import axios from "axios";
 import { getTranslation } from "../utils/APIRoutes";
 
-export default function ChatInput({ handleSendMsg, translate, message }) {
+export default function ChatInput({
+  handleSendMsg,
+  translateLang = "None",
+  message,
+}) {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -37,7 +41,7 @@ export default function ChatInput({ handleSendMsg, translate, message }) {
   const stop = async () => {
     setIsRecording(false);
     const formData = await stopRecording();
-    formData.append("translate", translate);
+    formData.append("language", translateLang);
     const res = await axios.post(getTranslation, formData, {
       headers: { "Content-type": `multipart/form-data` },
     });
