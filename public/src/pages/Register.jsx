@@ -65,11 +65,14 @@ export default function Register() {
     event.preventDefault();
     if (handleValidation()) {
       const { email, username, password } = values;
-      const { data } = await axios.post(registerRoute, {
-        username,
-        email,
-        password,
-      });
+      const { data } = await axios.post(
+        process.env.REACT_APP_SERVER_BASE_URL + registerRoute,
+        {
+          username,
+          email,
+          password,
+        }
+      );
 
       if (data.status === false) {
         toast.error(data.msg, toastOptions);

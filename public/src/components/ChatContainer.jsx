@@ -26,10 +26,13 @@ export default function ChatContainer({
       const data = await JSON.parse(
         localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
       );
-      const response = await axios.post(recieveMessageRoute, {
-        from: data._id,
-        to: currentChat._id,
-      });
+      const response = await axios.post(
+        process.env.REACT_APP_SERVER_BASE_URL + recieveMessageRoute,
+        {
+          from: data._id,
+          to: currentChat._id,
+        }
+      );
       setMessages(response.data);
     })();
   }, [currentChat]);
@@ -55,7 +58,7 @@ export default function ChatContainer({
       msg,
     });
     handleSendMessage(msg);
-    await axios.post(sendMessageRoute, {
+    await axios.post(process.env.REACT_APP_SERVER_BASE_URL + sendMessageRoute, {
       from: data._id,
       to: currentChat._id,
       message: msg,
@@ -171,7 +174,6 @@ export default function ChatContainer({
 const Container = styled.div`
   display: grid;
   grid-template-rows: 10% 80% 10%;
-  gap: 0.1rem;
   overflow: hidden;
   background-color: #ebdfdf73;
   @media screen and (min-width: 720px) and (max-width: 1080px) {

@@ -43,10 +43,13 @@ export default function Login() {
     event.preventDefault();
     if (validateForm()) {
       const { username, password } = values;
-      const { data } = await axios.post(loginRoute, {
-        username,
-        password,
-      });
+      const { data } = await axios.post(
+        process.env.REACT_APP_SERVER_BASE_URL + loginRoute,
+        {
+          username,
+          password,
+        }
+      );
       if (data.status === false) {
         toast.error(data.msg, toastOptions);
       }

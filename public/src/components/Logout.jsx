@@ -18,7 +18,9 @@ export default function Logout({ message }) {
     const id = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
     )._id;
-    const data = await axios.get(`${logoutRoute}/${id}`);
+    const data = await axios.get(
+      `${process.env.REACT_APP_SERVER_BASE_URL + logoutRoute}/${id}`
+    );
     if (data.status === 200) {
       localStorage.clear();
       navigate("/login");

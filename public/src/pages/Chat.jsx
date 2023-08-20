@@ -58,14 +58,18 @@ export default function Chat() {
 
   useEffect(() => {
     if (currentUser) {
-      socket.current = io(host);
+      socket.current = io(process.env.REACT_APP_SERVER_BASE_URL);
       socket.current.emit("add-user", currentUser._id);
     }
   }, [currentUser]);
 
   useEffect(async () => {
     if (currentUser) {
-      const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
+      const data = await axios.get(
+        `${process.env.REACT_APP_SERVER_BASE_URL + allUsersRoute}/${
+          currentUser._id
+        }`
+      );
       setContacts(data.data);
     }
   }, [currentUser]);
@@ -138,7 +142,7 @@ const Container = styled.div`
     background-color: #eff4f9;
     display: grid;
     grid-template-columns: 25% 75%;
-    @media screen and (min-width: 720px) and (max-width: 1080px) {
+    @media screen and (max-width: 1080px) {
       grid-template-columns: 35% 65%;
     }
   }

@@ -7,13 +7,15 @@ const audioRoutes = require("./routes/audio");
 const app = express();
 const socket = require("socket.io");
 const bodyParser = require("body-parser");
+const db =
+  "mongodb+srv://srishtigupta219:srishtigupta219@cluster0.pkwp6bc.mongodb.net/IntelliChatDb?retryWrites=true&w=majority";
 require("dotenv").config();
 
 app.use(cors());
 app.use(express.json());
 
 mongoose
-  .connect(process.env.MONGO_URL, {
+  .connect(db, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -34,7 +36,7 @@ const server = app.listen(process.env.PORT, () =>
 );
 const io = socket(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_BASE_URL,
     credentials: true,
   },
 });

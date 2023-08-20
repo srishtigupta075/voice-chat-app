@@ -60,10 +60,13 @@ export default function Contacts({
   useEffect(() => {
     Promise.all(
       contacts.map(async (contact) => {
-        const response = await axios.post(recieveMessageRoute, {
-          from: currentUserData._id,
-          to: contact?._id,
-        });
+        const response = await axios.post(
+          process.env.REACT_APP_SERVER_BASE_URL + recieveMessageRoute,
+          {
+            from: currentUserData._id,
+            to: contact?._id,
+          }
+        );
         const msgs = response.data;
         return { [contact?._id]: msgs[msgs.length - 1]?.message };
       })
@@ -95,7 +98,10 @@ export default function Contacts({
                 onClick={() => changeCurrentChat(index, contact)}
               >
                 <div className="avatar">
-                  <Avatar {...stringAvatar(`${contact.username}`)} />
+                  <Avatar
+                    className="profileIcon"
+                    {...stringAvatar(`${contact.username}`)}
+                  />
                 </div>
                 <div className="username">
                   <h3>{contact.username}</h3>
@@ -107,7 +113,10 @@ export default function Contacts({
         </div>
         <div className="current-user">
           <div className="avatar">
-            <Avatar {...stringAvatar(`${currentUserData?.username}`)} />
+            <Avatar
+              className="profileIcon"
+              {...stringAvatar(`${currentUserData?.username}`)}
+            />
           </div>
           <div className="username">
             <h3>{currentUserData?.username}</h3>
@@ -162,15 +171,25 @@ const Container = styled.div`
       gap: 1rem;
       align-items: center;
       transition: 0.5s ease-in-out;
+      @media screen and (max-width: 480px) {
+        min-height: 4rem;
+        gap: 0.5rem;
+      }
       .avatar {
-        img {
-          height: 3rem;
+        .profileIcon {
+          @media screen and (max-width: 480px) {
+            height: 30px;
+            width: 30px;
+          }
         }
       }
       .username {
         overflow: hidden;
         h3 {
           color: black;
+          @media screen and (max-width: 480px) {
+            font-size: medium;
+          }
         }
         h5 {
           white-space: nowrap;
@@ -193,14 +212,19 @@ const Container = styled.div`
     align-items: center;
     gap: 1rem;
     .avatar {
-      img {
-        height: 3rem;
-        max-inline-size: 100%;
+      .profileIcon {
+        @media screen and (max-width: 480px) {
+          height: 30px;
+          width: 30px;
+        }
       }
     }
     .username {
       h3 {
         color: white;
+        @media screen and (max-width: 480px) {
+          font-size: medium;
+        }
       }
     }
     @media screen and (min-width: 720px) and (max-width: 1080px) {

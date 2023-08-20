@@ -31,6 +31,14 @@ const Container = styled.div`
   h1,
   h3 {
     color: black;
+    @media screen and (max-width: 480px) {
+      font-size: x-small;
+    }
+  }
+  h1 {
+    @media screen and (max-width: 480px) {
+      font-size: large;
+    }
   }
   img {
     height: 10rem;

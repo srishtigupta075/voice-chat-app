@@ -47,9 +47,13 @@ export default function ChatInput({
     setIsRecording(false);
     const formData = await stopRecording();
     formData.append("language", translateLang);
-    const res = await axios.post(getTranslation, formData, {
-      headers: { "Content-type": `multipart/form-data` },
-    });
+    const res = await axios.post(
+      process.env.REACT_APP_SERVER_BASE_URL + getTranslation,
+      formData,
+      {
+        headers: { "Content-type": `multipart/form-data` },
+      }
+    );
     let message = res.data.msg;
     if (message.startsWith('"')) {
       message = message.substring(1, message.length - 1);
@@ -109,9 +113,10 @@ const Container = styled.div`
   gap: 0.5rem;
   background-color: hsl(205, 97%, 41%);
   padding: 0 2rem;
-  @media screen and (min-width: 720px) and (max-width: 1080px) {
+  @media screen and (max-width: 1080px) {
     padding: 0 1rem;
     gap: 1rem;
+    grid-template-columns: 5% 5% 85%;
   }
   .recorder {
     width: 24px;
@@ -193,7 +198,7 @@ const Container = styled.div`
       align-items: center;
       background-color: rgba(197, 194, 194, 0.45);
       border: none;
-      @media screen and (min-width: 720px) and (max-width: 1080px) {
+      @media screen and (max-width: 1080px) {
         padding: 0.3rem 1rem;
         svg {
           font-size: 1rem;
