@@ -1,5 +1,5 @@
 import React from "react";
-import Logo from "../assets/chat-icon.jpg";
+import Logo from "../assets/logo1.png";
 import styled from "styled-components";
 import Logout from "./Logout";
 import { FcAssistant } from "react-icons/fc";
@@ -35,9 +35,9 @@ const Container = styled.div`
     display: flex;
     gap: 1rem;
     padding: 1rem;
-    // justify-content: space-between;
     img {
       height: 2rem;
+      border-radius: 100%;
     }
     h2 {
       color: white;
@@ -47,7 +47,8 @@ const Container = styled.div`
     }
     .leftBar {
       display: flex;
-      gap: 1rem;
+      gap: 0.5rem;
+      align-items: center;
     }
     .rightBar {
       display: flex;

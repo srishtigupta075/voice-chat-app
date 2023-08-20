@@ -13,6 +13,7 @@ export default function ChatInput({
   handleSendMsg,
   translateLang = "None",
   message,
+  currentChat,
 }) {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -28,6 +29,10 @@ export default function ChatInput({
       }
     }
   }, [message]);
+
+  useEffect(() => {
+    setMsg("");
+  }, [currentChat]);
 
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);

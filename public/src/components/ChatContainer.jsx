@@ -162,6 +162,7 @@ export default function ChatContainer({
         handleSendMsg={handleSendMsg}
         translateLang={userTranslateMap[currentChat._id]}
         message={message}
+        currentChat={currentChat}
       />
     </Container>
   );

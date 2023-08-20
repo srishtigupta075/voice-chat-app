@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import Minions from "../assets/minions.gif";
+import Logo from "../assets/WelcomeLogo.png";
 export default function Welcome() {
   const [userName, setUserName] = useState("");
   useEffect(async () => {
@@ -12,7 +12,7 @@ export default function Welcome() {
   }, []);
   return (
     <Container>
-      <img src={Minions} alt="" />
+      <img src={Logo} alt="" />
       <h1>
         Welcome, <span>{userName}!</span>
       </h1>
@@ -28,14 +28,14 @@ const Container = styled.div`
   color: white;
   flex-direction: column;
   background-color: #ebdfdf73;
-  h1, h3 {
+  h1,
+  h3 {
     color: black;
   }
   img {
     height: 10rem;
-    margin-bottom: 2rem;
   }
   span {
-    color:  hsl(205, 97%, 41%);
+    color: hsl(205, 97%, 41%);
   }
 `;
